@@ -12,6 +12,10 @@ current_pose2 = Pose()
 current_vel1 = Twist()
 current_vel2 = Twist()
 
+def is_out_of_limits(pose, low_limit, high_limit):
+    return pose.x < low_limit or pose.x > high_limit or pose.y < low_limit or pose.y > high_limit
+
+
 def is_non_zero(twist):
 	return any(v != 0 for v in [twist.linear.x, twist.linear.y, twist.angular.z])
 
@@ -22,7 +26,7 @@ def callback_vel(cmd_vel,turtle_name):
 	
 	if turtle_name == 'turtle1':
 		current_vel1 = cmd_vel
-	else:
+	elif turtle_name == 'turtle2':
 		current_vel2 = cmd_vel
 
 def callback_pose(pose,turtle_name):
@@ -32,14 +36,14 @@ def callback_pose(pose,turtle_name):
 	
 	if turtle_name == 'turtle1':
 		current_pose1 = pose
-	else:
+	elif turtle_name == 'turtle2':
 		current_pose2 = pose
 	
-	rospy.loginfo("The position of %s is: %f, %f, %f",turtle_name ,pose.x, pose.y, pose.theta);
+	#rospy.loginfo("The position of %s is: %f, %f, %f",turtle_name ,pose.x, pose.y, pose.theta);
 
 def checkDistance(): 
 
-	treshold = 1
+	treshold = 2
 	low_lim = 1
 	high_lim = 10 
 
@@ -58,7 +62,7 @@ def checkDistance():
 	
 	
 	    
-	rate = rospy.Rate(1)
+	rate = rospy.Rate(10)
 	
 	distance = Float32()
 	
@@ -72,12 +76,14 @@ def checkDistance():
 	
 		distance = math.sqrt((current_pose1.x-current_pose2.x)**2+(current_pose1.y-current_pose2.y)**2)
 		
-		if distance < treshold:
+		if distance < treshold or is_out_of_limits(current_pose1, low_lim, high_lim) or is_out_of_limits(current_pose2, low_lim, high_lim):
 			if is_non_zero(current_vel1):
 				pub_vel1.publish(my_vel)
+				print("turtle1 stopped, and the distance is %f",distance)
 				
 			elif is_non_zero(current_vel2):
-				pub_vel1.publish(my_vel)
+				pub_vel2.publish(my_vel)
+				print("turtle2 stopped and the distance is %f",distance)
 		
 		rate.sleep()
 

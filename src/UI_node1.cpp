@@ -58,6 +58,18 @@ int main(int argc, char **argv){
 		
 		ros::spinOnce();
 		loop_rate.sleep();
+		
+		/*my_vel.linear.x = 0.0;
+		my_vel.linear.y = 0.0;
+		my_vel.angular.z = 0.0;
+		
+		if(turtle_id==1)
+			turtle_pub1.publish(my_vel);
+		else if(turtle_id==2)
+			turtle_pub2.publish(my_vel);
+		else
+			std::cout<<"Selected turtle doesn't exists!"<<std::endl;*/
+
 	}
 	
 	return 0;
