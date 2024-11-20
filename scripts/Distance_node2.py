@@ -12,6 +12,18 @@ current_pose2 = Pose()
 current_vel1 = Twist()
 current_vel2 = Twist()
 
+blocked1 = false
+blocked2 = false
+
+def not_move_to_other_direction(current_pose1, current_pose2, velocity):
+	dx = current_pose1.x - current_pose2.x
+	dy = current_pose1.y - current_pose2.y
+	
+	scalar_product = dx * velocity.linear.x + dy * velocity.linear.y
+	
+	return scalar_product>0
+
+
 def is_out_of_limits(pose, low_limit, high_limit):
     return pose.x < low_limit or pose.x > high_limit or pose.y < low_limit or pose.y > high_limit
 
@@ -77,11 +89,14 @@ def checkDistance():
 		distance = math.sqrt((current_pose1.x-current_pose2.x)**2+(current_pose1.y-current_pose2.y)**2)
 		
 		if distance < treshold or is_out_of_limits(current_pose1, low_lim, high_lim) or is_out_of_limits(current_pose2, low_lim, high_lim):
-			if is_non_zero(current_vel1):
+		
+			if is_non_zero(current_vel1) and not_move_to_other_direction(current_pose1, current_pose2, current_vel1):
+			
 				pub_vel1.publish(my_vel)
 				print("turtle1 stopped, and the distance is %f",distance)
 				
-			elif is_non_zero(current_vel2):
+			elif is_non_zero(current_vel2) and not_move_to_other_direction(current_pose1, current_pose2, current_vel2):
+			
 				pub_vel2.publish(my_vel)
 				print("turtle2 stopped and the distance is %f",distance)
 		
