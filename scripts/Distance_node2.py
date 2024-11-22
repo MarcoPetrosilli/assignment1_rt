@@ -55,16 +55,16 @@ def not_move_to_other_direction(current_pose1, current_pose2, velocity, turtle_i
         
     else:
         delta_t = 1 / rate
-        r = velocity.linear.x / abs(velocity.angular.z)  # Calcola il raggio della traiettoria circolare
+        r = velocity.linear.x / abs(velocity.angular.z)
         theta_future = theta + velocity.angular.z * delta_t
         
-        if velocity.angular.z > 0:  # Rotazione antioraria
+        if velocity.angular.z > 0:
             x_c = x - r * math.sin(theta)
             y_c = y + r * math.cos(theta)
             
             x_future = x_c + r * math.sin(theta_future)
             y_future = y_c - r * math.cos(theta_future)
-        else:  # Rotazione oraria
+        else:
             x_c = x + r * math.sin(theta)
             y_c = y - r * math.cos(theta)
             
