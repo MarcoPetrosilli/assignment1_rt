@@ -12,9 +12,6 @@ current_pose2 = Pose()
 current_vel1 = Twist()
 current_vel2 = Twist()
 
-blocked1 = False
-blocked2 = False
-
 
 
 
@@ -28,23 +25,73 @@ def inverse_velocity(current_velocity):
 	return my_vel
 	
 
-def not_move_to_other_direction(current_pose1, current_pose2, velocity, turtle_id):
+def not_move_to_other_direction(current_pose1, current_pose2, velocity, turtle_id, distance, rate):
+    
+    if turtle_id == 1:
+        x = current_pose1.x
+        y = current_pose1.y
+        theta = current_pose1.theta
+        
+        dx = current_pose2.x - x
+        dy = current_pose2.y - y
+        
+    elif turtle_id == 2:
+        x = current_pose2.x
+        y = current_pose2.y
+        theta = current_pose2.theta
+        
+        dx = current_pose1.x - x
+        dy = current_pose1.y - y
 
-	if turtle_id == 1:
-		dx = current_pose2.x - current_pose1.x
-		dy = current_pose2.y - current_pose1.y
-	elif turtle_id == 2:
-		dx = current_pose1.x - current_pose2.x
-		dy = current_pose1.y - current_pose2.y
-	
-	scalar_product = dx * velocity.linear.x + dy * velocity.linear.y
-	norm_dist = calculate_module(dx, dy)
-	norm_vel = calculate_module(velocity.linear.x, velocity.linear.y)
-	
-	cos_angle = scalar_product/(norm_dist*norm_vel)
-	angle = math.acos(cos_angle)
-	
-	return angle < math.radians(45)
+    if velocity.angular.z == 0:
+        scalar_product = dx * velocity.linear.x + dy * velocity.linear.y
+        norm_dist = calculate_module(dx, dy)
+        norm_vel = calculate_module(velocity.linear.x, velocity.linear.y)
+
+        cos_angle = scalar_product / (norm_dist * norm_vel)
+        angle = math.acos(cos_angle)
+
+        return angle < math.radians(45)
+        
+    else:
+        delta_t = 1 / rate
+        r = velocity.linear.x / abs(velocity.angular.z)  # Calcola il raggio della traiettoria circolare
+        theta_future = theta + velocity.angular.z * delta_t
+        
+        if velocity.angular.z > 0:  # Rotazione antioraria
+            x_c = x - r * math.sin(theta)
+            y_c = y + r * math.cos(theta)
+            
+            x_future = x_c + r * math.sin(theta_future)
+            y_future = y_c - r * math.cos(theta_future)
+        else:  # Rotazione oraria
+            x_c = x + r * math.sin(theta)
+            y_c = y - r * math.cos(theta)
+            
+            x_future = x_c - r * math.sin(theta_future)
+            y_future = y_c + r * math.cos(theta_future)
+            
+        if turtle_id == 1:
+            dx_future = x_future - current_pose2.x
+            dy_future = y_future - current_pose2.y
+        else:
+            dx_future = x_future - current_pose1.x
+            dy_future = y_future - current_pose1.y
+        
+        distance_future = calculate_module(dx_future, dy_future)
+        
+        return distance_future < distance
+
+
+        
+        
+        
+        
+        
+
+
+
+
 	
 	
 def calculate_module(x, y):
@@ -128,12 +175,12 @@ def checkDistance():
 			my_vel.linear.y = 0.0;
 			my_vel.angular.z = 0.0;
 		
-			if is_not_zero(current_vel1) and not_move_to_other_direction(current_pose1, current_pose2, current_vel1,1):
+			if is_not_zero(current_vel1) and not_move_to_other_direction(current_pose1, current_pose2, current_vel1,1, distance, 10):
 			
 				pub_vel1.publish(my_vel)
 				print("turtle1 stopped, and the distance is %f",distance)
 				
-			elif is_not_zero(current_vel2) and not_move_to_other_direction(current_pose1, current_pose2, current_vel2,2):
+			elif is_not_zero(current_vel2) and not_move_to_other_direction(current_pose1, current_pose2, current_vel2,2, distance, 10):
 			
 				pub_vel2.publish(my_vel)
 				print("turtle2 stopped and the distance is %f",distance)
