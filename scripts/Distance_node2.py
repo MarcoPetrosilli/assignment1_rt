@@ -28,17 +28,18 @@ def inverse_velocity(current_velocity):
 	return my_vel
 	
 
-def not_move_to_other_direction(current_pose1, current_pose2, velocity):
+def not_move_to_other_direction(current_pose1, current_pose2, velocity, turtle_id):
 
-	dx = current_pose2.x - current_pose1.x
-	dy = current_pose2.y - current_pose1.y
+	if turtle_id == 1:
+		dx = current_pose2.x - current_pose1.x
+		dy = current_pose2.y - current_pose1.y
+	elif turtle_id == 2:
+		dx = current_pose1.x - current_pose2.x
+		dy = current_pose1.y - current_pose2.y
 	
 	scalar_product = dx * velocity.linear.x + dy * velocity.linear.y
 	norm_dist = calculate_module(dx, dy)
 	norm_vel = calculate_module(velocity.linear.x, velocity.linear.y)
-	
-	#print("sc: " + str(scalar_product))
-	#print("norm* : " + str(scalar_product))
 	
 	cos_angle = scalar_product/(norm_dist*norm_vel)
 	angle = math.acos(cos_angle)
@@ -112,46 +113,41 @@ def checkDistance():
 	
 	
 	my_vel = Twist()
-	my_vel.linear.x = 0.0;
-	my_vel.linear.y = 0.0;
-	my_vel.angular.z = 0.0;
-    
     
 	while not rospy.is_shutdown():
 
 		dist_x = current_pose1.x-current_pose2.x
 		dist_y = current_pose1.y-current_pose2.y
+		
 		distance = calculate_module(dist_x, dist_y)
 		
 		
-		close_turtles = distance < treshold
-		t1_out_limits = is_out_of_limits(current_pose1, low_lim, high_lim)
-		t2_out_limits = is_out_of_limits(current_pose2, low_lim, high_lim)
+		if distance < treshold:
 		
-		if close_turtles:
+			my_vel.linear.x = 0.0;
+			my_vel.linear.y = 0.0;
+			my_vel.angular.z = 0.0;
 		
-			if is_not_zero(current_vel1) and not_move_to_other_direction(current_pose1, current_pose2, current_vel1):
+			if is_not_zero(current_vel1) and not_move_to_other_direction(current_pose1, current_pose2, current_vel1,1):
 			
 				pub_vel1.publish(my_vel)
 				print("turtle1 stopped, and the distance is %f",distance)
 				
-			elif is_not_zero(current_vel2) and not_move_to_other_direction(current_pose1, current_pose2, current_vel1):
+			elif is_not_zero(current_vel2) and not_move_to_other_direction(current_pose1, current_pose2, current_vel2,2):
 			
 				pub_vel2.publish(my_vel)
 				print("turtle2 stopped and the distance is %f",distance)
 				
 				
-		if t1_out_limits or t2_out_limits:
-				
-			if t1_out_limits:
+		if is_out_of_limits(current_pose1, low_lim, high_lim):
 			
-				my_vel = inverse_velocity(current_vel1)
-				pub_vel1.publish(my_vel)
+			my_vel = inverse_velocity(current_vel1)
+			pub_vel1.publish(my_vel)
 				
-			elif t2_out_limits:
+		elif is_out_of_limits(current_pose2, low_lim, high_lim):
 			
-				my_vel = inverse_velocity(current_vel2)
-				pub_vel2.publish(my_vel)
+			my_vel = inverse_velocity(current_vel2)
+			pub_vel2.publish(my_vel)
 				
 			
 		

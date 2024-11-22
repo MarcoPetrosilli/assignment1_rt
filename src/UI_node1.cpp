@@ -14,7 +14,7 @@ int main(int argc, char **argv){
 	ros::ServiceClient turtle_client = n.serviceClient<turtlesim::Spawn>("/spawn");
 	
 	
-	//Assuming we've already started turtlesim before call the serivice, otherwise we need to 		use the following command that wait turtlesim be run
+	//Assuming we've already started turtlesim before call the serivice, otherwise we need to use the following command that wait turtlesim be run
 	//turtle_client.waitForService()
 	
 	turtlesim::Spawn my_spawn;
@@ -24,7 +24,6 @@ int main(int argc, char **argv){
 	my_spawn.request.theta = 0.0;
 	my_spawn.request.name = "turtle2";
 	
-	//We've to fill the request field 'cause turtle_client is not only the request, it collect 		the request and the response, it's useful to control the right complention 
 	
 	turtle_client.call(my_spawn);
 	
@@ -33,42 +32,44 @@ int main(int argc, char **argv){
 	geometry_msgs::Twist my_vel;
 	
 	int turtle_id;
+	bool valid_choice = false;
 	
 	while(ros::ok()){
 	
-		std::cout<<"Specify turtle [1/2]: "<<std::endl;
-		std::cin>>turtle_id;
-	
+		do{
+			std::cout<<"Specify turtle [1/2]: "<<std::endl;
+			std::cin>>turtle_id;
+			
+			if(turtle_id == 1 || turtle_id == 2)
+				valid_choice = true;
+			else
+				std::cout<<"Selected turtle doesn't exists!"<<std::endl;
+				
+		}while(!valid_choice);
+		
 		std::cout<<"Insert x linear vel: "<<std::endl;
 		std::cin>>my_vel.linear.x;
-		
+			
 		std::cout<<"Insert y linear vel: "<<std::endl;
 		std::cin>>my_vel.linear.y;
-		
+			
 		std::cout<<"Insert z angular vel: "<<std::endl;
 		std::cin>>my_vel.angular.z;
 		
-		if(turtle_id==1)
+		if(turtle_id==1){
 			turtle_pub1.publish(my_vel);
-		else if(turtle_id==2)
+			valid_choice = true;
+		}
+				
+		else if(turtle_id==2){
 			turtle_pub2.publish(my_vel);
-		else
-			std::cout<<"Selected turtle doesn't exists!"<<std::endl;
-			
+			valid_choice = true;
+		}
 		
+		valid_choice = false;
+
 		ros::spinOnce();
 		loop_rate.sleep();
-		
-		/*my_vel.linear.x = 0.0;
-		my_vel.linear.y = 0.0;
-		my_vel.angular.z = 0.0;
-		
-		if(turtle_id==1)
-			turtle_pub1.publish(my_vel);
-		else if(turtle_id==2)
-			turtle_pub2.publish(my_vel);
-		else
-			std::cout<<"Selected turtle doesn't exists!"<<std::endl;*/
 
 	}
 	
