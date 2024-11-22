@@ -88,9 +88,9 @@ def callback_pose(pose,turtle_name):
 
 def checkDistance(): 
 
-	treshold = 2
-	low_lim = 1
-	high_lim = 10 
+	treshold = 2.0
+	low_lim = 1.0
+	high_lim = 10.0
 
 	rospy.init_node('Distance_node2', anonymous=True)
 	    
