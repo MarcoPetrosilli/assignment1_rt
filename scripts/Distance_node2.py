@@ -168,6 +168,7 @@ def checkDistance():
 		
 		distance = calculate_module(dist_x, dist_y)
 		
+		pub_dis.publish(distance)
 		
 		if distance < treshold:
 		
