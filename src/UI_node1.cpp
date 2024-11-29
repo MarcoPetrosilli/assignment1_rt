@@ -56,15 +56,11 @@ int main(int argc, char **argv){
 		std::cout<<"Insert z angular vel: "<<std::endl;
 		std::cin>>my_vel.angular.z;
 		
-		if(turtle_id==1){
+		if(turtle_id==1)
 			turtle_pub1.publish(my_vel);
-			valid_choice = true;
-		}
 				
-		else if(turtle_id==2){
+		else
 			turtle_pub2.publish(my_vel);
-			valid_choice = true;
-		}
 		
 		valid_choice = false;
 
